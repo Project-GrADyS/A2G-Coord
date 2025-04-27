@@ -4,6 +4,7 @@ from gradysim.protocol.interface import IProtocol
 from gradysim.protocol.messages.communication import BroadcastMessageCommand
 from gradysim.protocol.messages.telemetry import Telemetry
 from gradysim.protocol.plugin.mission_mobility import MissionMobilityPlugin, MissionMobilityConfiguration, LoopMission
+from gradysim.simulator.extension.communication_controller import CommunicationController
 
 from typing import List, Tuple, Dict
 import json
@@ -21,6 +22,7 @@ class GroundProtocol(IProtocol):
     poi_num: int
 
     def initialize(self):
+        CommunicationController(self).set_transmission_range(3.0)
         self.start = self.provider.current_time()
         self.ix = 0
         self.time_poi = -1
@@ -34,6 +36,7 @@ class GroundProtocol(IProtocol):
         self.initial_mission_point = self.provider.get_kwargs().get("initial_mission_point")
         self.poi_num = self.provider.get_kwargs().get("poi_num")
         #self.found_poi = self.provider.get_kwargs().get("found_poi")
+        self.time_per_poi = self.provider.get_kwargs().get("time_per_poi")
         self.ugv_num = self.provider.get_kwargs().get("ugv_num")
         self.uav_num = self.provider.get_kwargs().get("uav_num")
         self.mission_list = [
@@ -43,7 +46,7 @@ class GroundProtocol(IProtocol):
         self.mission_plan = MissionMobilityPlugin(self, MissionMobilityConfiguration(
             loop_mission=LoopMission.RESTART, 
             speed=1,
-            tolerance=0.0
+            tolerance=0.0,
         ))
 
         self.provider.schedule_timer(
@@ -97,6 +100,8 @@ class GroundProtocol(IProtocol):
             if i == id:
                 return
         self.db_poi.append(id)
+        self.time_per_poi.append({"poi_id": id, "found_time": self.time_poi})
+        self.provider.set_kwargs("time_per_poi", self.time_per_poi)
         self.provider.set_kwargs("found_poi", self.db_poi)
     
     def start_mission(self, ml):

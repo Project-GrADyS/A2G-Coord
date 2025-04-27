@@ -4,6 +4,10 @@ import pandas as pd
 import matplotlib.pyplot as plt 
 import seaborn as sns
 import json
+import warnings
+
+warnings.simplefilter("ignore", category=FutureWarning)
+
 
 my_path = os.path.dirname(os.path.abspath(__file__))
 folder_path = "experiments"

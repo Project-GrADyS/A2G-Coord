@@ -25,19 +25,6 @@ class GridPathPlanning(IUAVPathPlanning):
             mission_section.append([x, y, 2])
         mission_section.append([-1 * self.size//2, -1 * self.size//2, 2])
         return mission_section
-    '''
-    def define_mission2(self):
-        mission_sublist = []
-
-        mission_sublist += self.generate_mission_section(-50, -50, -17, 2)
-        mission_sublist += self.generate_mission_section(0, -50, -17, 2)
-        mission_sublist += self.generate_mission_section(-50, -17, 17, 2)
-        mission_sublist += self.generate_mission_section(0, -17, 17, 2)
-        mission_sublist += self.generate_mission_section(-50, 17, 50, 2)
-        mission_sublist += self.generate_mission_section(0, 17, 50, 2)
-
-        return [mission_sublist]
-    '''
     
     def define_mission(self):
         total_mission = []

@@ -19,8 +19,10 @@ class AirProtocol(IProtocol):
     mission_plan: MissionMobilityPlugin
     ugv_db: List[int]
     path_planning: List[List[int]]
+    id: int
     
     def initialize(self):
+        self.id = self.provider.get_id()
         self.sent = 0
         self.ugv_db = []
         self.received_poi = 0
@@ -47,7 +49,7 @@ class AirProtocol(IProtocol):
     def start_mission(self):
         mission_list = self.path_planning
         if not (mission_list == []):
-            self.mission_plan.start_mission(mission_list.pop())
+            self.mission_plan.start_mission(self.path_planning.pop())
 
     def handle_timer(self, timer: str):
         if timer == "message":
@@ -107,7 +109,7 @@ class AirProtocol(IProtocol):
         return False
     
     def calculate_direction(self, x, y, z, length, initial_x, initial_y):
-        
+        '''
         vector_x = x - initial_x
         vector_y = y - initial_y
         direction_x = vector_x / math.sqrt(math.pow(vector_x, 2) + math.pow(vector_y, 2))
@@ -154,8 +156,9 @@ class AirProtocol(IProtocol):
                 dir_x = half_length
         elif dir_y < 0 and dir_y < (-1* half_length):
             dir_y = -1* half_length
-        
-        return (dir_x, dir_y, z)
+        '''
+        #return (dir_x, dir_y, z)
+        return (x,y,z)
 
     def handle_telemetry(self, telemetry: Telemetry):
         self.position = telemetry.current_position

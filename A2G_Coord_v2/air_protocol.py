@@ -82,8 +82,6 @@ class AirProtocol(AirProtocolv1):
             remaining_points.remove(closest_point)
         
         return ordered_points
-
-
     
     def handle_telemetry(self, telemetry):
         return super().handle_telemetry(telemetry)

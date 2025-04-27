@@ -1,6 +1,7 @@
 from gradysim.simulator.handler.communication import CommunicationMedium, CommunicationHandler
 from gradysim.simulator.handler.mobility import MobilityHandler
 from gradysim.simulator.handler.timer import TimerHandler
+from gradysim.simulator.extension.communication_controller import CommunicationController
 from gradysim.simulator.simulation import SimulationBuilder, SimulationConfiguration
 from path_planning.grid_path_planning import GridPathPlanning
 from simulation_config.algorithm_config import set_algorithms
@@ -78,7 +79,7 @@ def main(algorithm_version):
             gy = map_size * math.tan(math.radians(90 - current_angle)) - half_map_size
             gx = half_map_size
         ugv_ids.append(
-            builder.add_node(ground_protocol, (-1 * half_map_size, -1 * half_map_size, 0), initial_mission_point=(gx, gy, 0), poi_num=poi_num, ugv_num=ugv_num, uav_num=uav_num, time_poi=-1, got_all=False, found_poi=[]),
+            builder.add_node(ground_protocol, (-1 * half_map_size, -1 * half_map_size, 0), initial_mission_point=(gx, gy, 0), poi_num=poi_num, ugv_num=ugv_num, uav_num=uav_num, time_poi=-1, got_all=False, found_poi=[], time_per_poi=[]),
         )
         
     # UAV
@@ -117,6 +118,7 @@ def main(algorithm_version):
     found_poi = []
     got_all = False
     last_second = 0
+    time_per_poi = []
 
     while simulation.step_simulation():
         if got_all:
@@ -152,15 +154,29 @@ def main(algorithm_version):
                     "z": ugv_position[2],
                     "time_poi": time_poi["time_poi"]
                 })
-                fp = simulation.get_node(ugv_id).kwargs["found_poi"]
-                found_poi = list(set(found_poi + fp))
-                #print(found_poi)
-                if len(found_poi) == poi_num:
+
+                new_time_per_poi = simulation.get_node(ugv_id).kwargs["time_per_poi"]
+                existing_poi_ids = {d["poi_id"] for d in time_per_poi}
+                time_per_poi.extend(d for d in new_time_per_poi if d["poi_id"] not in existing_poi_ids)
+                #fp = simulation.get_node(ugv_id).kwargs["found_poi"]
+                #found_poi = list(set(found_poi + fp))
+                
+                if len(time_per_poi) == poi_num:
                     got_all = True
                     total_time = positions_ugv[-1]["time_poi"]
     
     if not got_all:
         total_time = -1
+
+    poi_times = []
+
+    for i in range(poi_num):
+        poi_times.append(-1)
+    
+
+    if time_per_poi != []:
+        for data in time_per_poi:
+            poi_times[data["poi_id"]] = data["found_time"]
 
     if generate_graph != 0:
         plot_path = f"{my_path}/experiments/{csv_path}/algorithm_{algorithm_version}/images/{csv_name}_exp{experiment_num}.png"
@@ -168,7 +184,7 @@ def main(algorithm_version):
     
     # CSV
     with open(f'experiments/{csv_path}/algorithm_{algorithm_version}/data/{csv_name}.csv', mode='a', newline="") as fd:
-        data = [[experiment_num, ugv_num, uav_num, poi_num, communication_range, total_time]]
+        data = [[experiment_num, ugv_num, uav_num, poi_num, communication_range, total_time] + poi_times]
         writer = csv.writer(fd)
         writer.writerows(data)
     

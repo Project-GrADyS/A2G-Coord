@@ -3,21 +3,32 @@ import csv
 import time
 import json
 from simulation_config.folder_config import create_folder
-from simulation_config.algorithm_config import set_algorithms, serialize_algorithms
+#from simulation_config.algorithm_config import set_algorithms, serialize_algorithms
 
 start_time = time.time()
 
 num_experiments = 10
 
+# args = {
+#     "ugv_num": ["2", "4", "8"],
+#     "uav_num": ["1", "2"],
+#     "poi_num": ["5", "15", "25"],
+#     "communication_range": ["5", "10", "20"],
+#     "generate_graph": 1,
+#     "csv_path": "experiment_6",
+#     "map_size": "100",
+#     "algorithms": ["v1", "v2", "v3"] 
+# }
+
 args = {
-    "ugv_num": ["2", "4", "8"],
-    "uav_num": ["1", "2"],
-    "poi_num": ["5", "15", "25"],
-    "communication_range": ["5", "10", "20"],
+    "ugv_num": ["2"],
+    "uav_num": ["2"],
+    "poi_num": ["5"],
+    "communication_range": ["10"],
     "generate_graph": 1,
-    "csv_path": "experiment_all2",
+    "csv_path": "experiment_v1_v5",
     "map_size": "100",
-    "algorithms": ["v1", "v2", "v3"] 
+    "algorithms": ["v1", "v5"] 
 }
 
 header = ['experiment', 'ugv_num', 'uav_num', 'poi_num', 'comm_range', 'time_poi'] 
@@ -42,11 +53,15 @@ for comm_range in args["communication_range"]:
     for uav_num in args["uav_num"]:
         for ugv_num in args["ugv_num"]:
             for poi_num in args["poi_num"]:
+                header_list = []
+                for p in range(int(poi_num)):
+                    name_column = 'poi' + str(p+1)
+                    header_list.append(name_column)
                 for algorithm_version in args["algorithms"]:
                     algorithm_path_data = folder_path + f'/algorithm_{algorithm_version}/data'
                     file_name = args["csv_path"] + "_ugv" + ugv_num + "_uav" + uav_num + "_poi" + poi_num + "_range" + comm_range
                     with open(algorithm_path_data + f"/{file_name}.csv", 'w') as file: 
-                        dw = csv.DictWriter(file, fieldnames=header)
+                        dw = csv.DictWriter(file, fieldnames=header+header_list)
                         dw.writeheader()
                 for i in range(num_experiments):
                     subprocess.run(["python3", "main.py", 
@@ -63,7 +78,7 @@ for comm_range in args["communication_range"]:
                                     ],)
 
 # Create plot
-subprocess.run(["python3", "run_graphs.py", args["csv_path"], json.dumps(args["algorithms"])],)
+subprocess.run(["pypy", "run_graphs.py", args["csv_path"], json.dumps(args["algorithms"])],)
 
 end_time = time.time()
 

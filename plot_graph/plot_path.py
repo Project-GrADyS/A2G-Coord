@@ -10,6 +10,8 @@ class PlotPath:
         self.positions_ugv = positions_ugv
         self.poi_positions = poi_positions
         self.communication_range = communication_range
+        self.communication_range_ugv = 3.0
+        self.communication_range_poi = 3.0
         self.plot_path = plot_path
         self.color_list = ['#cf7073', '#01a049', "#00008a", "#efbf04", "#8a00c4", "#ffa600", "#4bc0ad", "#b25c5c"]
         self.color_list_uav = ['#bad1f720', '#8dfc9120', '#ebde3420']
@@ -39,7 +41,7 @@ class PlotPath:
                 ha='left',
                 weight='normal'
             )
-            circle = plt.Circle((x, y), self.communication_range/2, color="#eeeeee", alpha=0.5, edgecolor=None)
+            circle = plt.Circle((x, y), self.communication_range_poi/2, color="#eeeeee", alpha=0.5, edgecolor=None)
             ax.add_patch(circle)
 
         grouped_uav = position_uav_df.groupby("agent")
@@ -61,7 +63,7 @@ class PlotPath:
             s = role + ' ' + str(agent)
             line = plt.plot(group['x'], group['y'], marker='o', linestyle='-', ms=1,
                     label=s, color=self.color_list[pos])
-            data_linewidth_plot(group['x'], group['y'], marker=None, linestyle='-', linewidth=self.communication_range, color=line[0].get_color(), label=None, alpha=0.1)
+            data_linewidth_plot(group['x'], group['y'], marker=None, linestyle='-', linewidth=self.communication_range_ugv, color=line[0].get_color(), label=None, alpha=0.1)
             pos += 1
 
         handles, labels = plt.gca().get_legend_handles_labels()

@@ -7,6 +7,7 @@ from gradysim.protocol.messages.mobility import GotoCoordsMobilityCommand
 from gradysim.protocol.messages.telemetry import Telemetry
 from gradysim.protocol.plugin.random_mobility import RandomMobilityPlugin, RandomMobilityConfig
 from gradysim.protocol.plugin.mission_mobility import MissionMobilityPlugin, MissionMobilityConfiguration, LoopMission
+from gradysim.simulator.extension.communication_controller import CommunicationController
 
 from typing import List, Tuple, Dict
 import json
@@ -18,6 +19,7 @@ class PoIProtocol(IProtocol):
     id: int
 
     def initialize(self):
+        CommunicationController(self).set_transmission_range(3.0)
         self.sent = 0
         self.position = Tuple[float, float, float]
         self.id = self.provider.get_id()
