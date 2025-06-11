@@ -1,4 +1,4 @@
-from A2G_Coord_v1.air_protocol import AirProtocol as AirProtocolv1
+from A2G_Coord_v3.air_protocol import AirProtocol as AirProtocolv3
 
 from gradysim.protocol.messages.communication import BroadcastMessageCommand
 from gradysim.protocol.messages.mobility import GotoCoordsMobilityCommand
@@ -7,20 +7,21 @@ from typing import List, Tuple, Dict
 import random
 import json
 import math
-import logging
 
-class AirProtocol(AirProtocolv1):
+class AirProtocol(AirProtocolv3):
 
     next_coordinate_index: int
     num_of_tentatives: int
     is_at_center: bool
+    time_interval: int
 
     def initialize(self):
+        self.time_interval = self.provider.get_kwargs().get("time_interval")
         self.num_of_tentatives = 2
         self.is_at_center = False
         self.provider.schedule_timer(
             "center",  
-            self.provider.current_time() + 100
+            self.provider.current_time() + self.time_interval
         )
         return super().initialize()
     
@@ -28,7 +29,7 @@ class AirProtocol(AirProtocolv1):
         if timer == "center":
             if not self.is_at_center:
                 self.is_at_center = True
-                self.next_coordinate_index = self.mission_plan.current_waypoint
+                self. next_coordinate_index = self.mission_plan.current_waypoint
                 command = GotoCoordsMobilityCommand(0,0,0)
                 self.provider.send_mobility_command(command)
             if self.num_of_tentatives > 0:
@@ -52,7 +53,7 @@ class AirProtocol(AirProtocolv1):
                 self.is_at_center = False
                 self.provider.schedule_timer(
                     "center",  
-                    self.provider.current_time() + 100
+                    self.provider.current_time() + self.time_interval
                 )
         return super().handle_timer(timer)
     
@@ -71,24 +72,20 @@ class AirProtocol(AirProtocolv1):
                     message=json.dumps(msg)
                 )
                 self.provider.send_communication_command(command)
-                # print("\n========UAV RENDEZVOUS=============")
-                # print(self.poi_buffer)
-                # print(msg["sender_id"])
                 for p in received_poi:
-                    self.check_duplicates(p[0], p[1])
-                # print(self.poi_buffer)
+                    res = self.check_duplicates(p[0], p[1])
+                    if not res:
+                        self.sent_pois.append({"sent": False, "id": p[0], "position": p[1]})
             elif msg["type"] == "uav_rendezvous_response":
                 received_poi = msg["collected_poi"]
                 for p in received_poi:
-                    self.check_duplicates(p[0], p[1])
+                    res = self.check_duplicates(p[0], p[1])
+                    if not res:
+                        self.sent_pois.append({"sent": False, "id": p[0], "position": p[1]})
         return super().handle_packet(message)
     
     def handle_telemetry(self, telemetry):
         return super().handle_telemetry(telemetry)
     
     def finish(self):
-        logging.info(self.id)
-        logging.info("UAVS\n")
-        logging.info(self.poi_buffer)
-        logging.info("\n")
         return super().finish()

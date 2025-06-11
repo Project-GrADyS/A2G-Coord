@@ -7,7 +7,7 @@ from simulation_config.folder_config import create_folder
 
 start_time = time.time()
 
-num_experiments = 10
+num_experiments = 2
 
 # args = {
 #     "ugv_num": ["2", "4", "8"],
@@ -21,14 +21,14 @@ num_experiments = 10
 # }
 
 args = {
-    "ugv_num": ["2"],
-    "uav_num": ["2"],
+    "ugv_num": ["4"],
+    "uav_num": ["2","3"],
     "poi_num": ["5"],
     "communication_range": ["10"],
     "generate_graph": 1,
-    "csv_path": "experiment_v1_v5",
+    "csv_path": "experiment_v7v6v5_buffer",
     "map_size": "100",
-    "algorithms": ["v1", "v5"] 
+    "algorithms": ["v5", "v6", "v7"] 
 }
 
 header = ['experiment', 'ugv_num', 'uav_num', 'poi_num', 'comm_range', 'time_poi'] 
@@ -36,6 +36,11 @@ header = ['experiment', 'ugv_num', 'uav_num', 'poi_num', 'comm_range', 'time_poi
 # Create experiment folder structure
 folder_path = f'experiments/{args["csv_path"]}'
 create_folder(folder_path)
+
+create_folder(f'experiments/{args["csv_path"]}/metrics')
+create_folder(f'experiments/{args["csv_path"]}/metrics/mean_time')
+create_folder(f'experiments/{args["csv_path"]}/metrics/boxplot_average_time')
+create_folder(f'experiments/{args["csv_path"]}/metrics/individual_time')
 
 # Run experiments
 
@@ -76,9 +81,13 @@ for comm_range in args["communication_range"]:
                                     args["map_size"],
                                     json.dumps(args["algorithms"])
                                     ],)
+#Join CSVs
+subprocess.run(["pypy", "join_csvs.py", args["csv_path"], json.dumps(args["algorithms"])],)
 
-# Create plot
+# Create graphs
 subprocess.run(["pypy", "run_graphs.py", args["csv_path"], json.dumps(args["algorithms"])],)
+
+subprocess.run(["pypy", "run_boxplot.py", args["csv_path"], json.dumps(args["algorithms"])],)
 
 end_time = time.time()
 

@@ -7,8 +7,10 @@ import json
 
 my_path = os.path.dirname(os.path.abspath(__file__))
 folder_path = "experiments"
-csv_prefix = "experiment_fusion"
-algorithms = ["v1", "v2", "v3"]
+#csv_prefix = sys.argv[1]
+csv_prefix = "experiment_timeIntervalUAV"
+#algorithms = json.loads(sys.argv[2])
+algorithms = ["v7"]
 column_name = "time_poi"
 
 alg_df = []
@@ -20,19 +22,24 @@ for algorithm_version in algorithms:
         if file_name.startswith(csv_prefix) and file_name.endswith('.csv'):
             file_path = os.path.join(algorithm_path + '/data', file_name)
             df = pd.read_csv(file_path)
-            df_filtered = df[df[column_name] != -1]
+            df_filtered = df[[col for col in df.columns if not (col.startswith("poi") and col!= "poi_num")]]
+            df_filtered = df_filtered[df_filtered[column_name] != -1]
             df_filtered = df_filtered.drop(columns="experiment")
+            #print(df_filtered)
             #df_filtered["time_poi"] = df_filtered[column_name].mean()
             #grouped_df = df_filtered.groupby(['ugv_num', 'uav_num', 'poi_num', 'comm_range'], as_index=False).mean()
             dataframes.append(df_filtered)
 
     combined_df = pd.concat(dataframes, ignore_index=True)
     #print(combined_df)
+    #print(combined_df)
     alg_df.append(combined_df)
 
-path = f'{my_path}/{folder_path}/{csv_prefix}'
+#print(alg_df)
+path = f'{my_path}/{folder_path}/{csv_prefix}/metrics/boxplot_average_time'
 
-all_df = pd.concat({'BA': alg_df[0], 'GA': alg_df[1], 'LBA': alg_df[2]}, names=['algorithm', 'old_index'])
+#all_df = pd.concat({'BA': alg_df[0], 'GA': alg_df[1], 'LBA': alg_df[2]}, names=['algorithm', 'old_index'])
+all_df = pd.concat({'v7': alg_df[0]}, names=['algorithm', 'old_index'])
 all_df = all_df.reset_index(level=0).reset_index(drop=True)
 
 # UGV Number
@@ -61,5 +68,12 @@ sns.boxplot(data=all_df, x='comm_range', y='time_poi', hue='algorithm', palette=
 plt.xlabel("Communication Range")
 plt.ylabel("Time to find all POI")
 plt.savefig(f"{path}/{csv_prefix}_boxplot_range_time.png")
+plt.clf()
+
+# Time Interval
+sns.boxplot(data=all_df, x='time_interval', y='time_poi', hue='algorithm', palette='crest', showfliers = False)
+plt.xlabel("Time Interval")
+plt.ylabel("Time to find all POI")
+plt.savefig(f"{path}/{csv_prefix}_boxplot_timeInterval_time.png")
 plt.clf()
 

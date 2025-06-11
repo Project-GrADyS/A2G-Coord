@@ -1,4 +1,4 @@
-from A2G_Coord_v1.air_protocol import AirProtocol as AirProtocolv1
+from A2G_Coord_v2.air_protocol import AirProtocol as AirProtocolv2
 
 from gradysim.protocol.messages.communication import BroadcastMessageCommand
 from gradysim.protocol.messages.mobility import GotoCoordsMobilityCommand
@@ -7,9 +7,8 @@ from typing import List, Tuple, Dict
 import random
 import json
 import math
-import logging
 
-class AirProtocol(AirProtocolv1):
+class AirProtocol(AirProtocolv2):
 
     next_coordinate_index: int
     num_of_tentatives: int
@@ -28,7 +27,7 @@ class AirProtocol(AirProtocolv1):
         if timer == "center":
             if not self.is_at_center:
                 self.is_at_center = True
-                self.next_coordinate_index = self.mission_plan.current_waypoint
+                self. next_coordinate_index = self.mission_plan.current_waypoint
                 command = GotoCoordsMobilityCommand(0,0,0)
                 self.provider.send_mobility_command(command)
             if self.num_of_tentatives > 0:
@@ -87,8 +86,4 @@ class AirProtocol(AirProtocolv1):
         return super().handle_telemetry(telemetry)
     
     def finish(self):
-        logging.info(self.id)
-        logging.info("UAVS\n")
-        logging.info(self.poi_buffer)
-        logging.info("\n")
         return super().finish()

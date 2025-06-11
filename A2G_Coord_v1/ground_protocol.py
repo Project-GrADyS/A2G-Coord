@@ -8,7 +8,6 @@ from gradysim.simulator.extension.communication_controller import CommunicationC
 
 from typing import List, Tuple, Dict
 import json
-from tabulate import tabulate
 
 class GroundProtocol(IProtocol):
     sent: int
@@ -35,7 +34,6 @@ class GroundProtocol(IProtocol):
         self.got_all = self.provider.get_kwargs().get("got_all")
         self.initial_mission_point = self.provider.get_kwargs().get("initial_mission_point")
         self.poi_num = self.provider.get_kwargs().get("poi_num")
-        #self.found_poi = self.provider.get_kwargs().get("found_poi")
         self.time_per_poi = self.provider.get_kwargs().get("time_per_poi")
         self.ugv_num = self.provider.get_kwargs().get("ugv_num")
         self.uav_num = self.provider.get_kwargs().get("uav_num")
@@ -65,7 +63,7 @@ class GroundProtocol(IProtocol):
                 reply_msg = {
                     "type": "uav_message",
                     "id": self.id,
-                    #"received_poi": self.db_poi
+                    "received_poi": self.db_poi
                 }
                 command = BroadcastMessageCommand(
                         message=json.dumps(reply_msg)
@@ -80,20 +78,11 @@ class GroundProtocol(IProtocol):
                     mission_list2 = [
                         dir
                     ]
-                    #self.mission_plan.stop_mission()
                     self.start_mission(mission_list2)
                     self.received_directions.append(msg["directions"])
             elif msg["type"] == "poi_message":
                 self.received_poi += 1
                 self.check_duplicates(msg["id"])
-                '''
-                if len(self.db_poi) == self.poi_num and not self.got_all:
-                    self.end = self.provider.current_time()
-                    self.time_poi = self.end - self.start
-                    self.provider.set_kwargs("time_poi", self.time_poi)
-                    self.provider.set_kwargs("got_all", True)
-                    self.got_all = True
-                '''
     
     def check_duplicates(self, id):
         for i in self.db_poi:

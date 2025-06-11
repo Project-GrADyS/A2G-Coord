@@ -2,6 +2,10 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 from plot_graph.data_line_width_plot import data_linewidth_plot
+import warnings
+
+warnings.simplefilter("ignore", category=FutureWarning)
+warnings.simplefilter("ignore", category=UserWarning)
 
 class PlotPath:
 

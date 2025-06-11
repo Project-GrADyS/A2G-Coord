@@ -31,7 +31,6 @@ class AirProtocol(AirProtocolv1):
                     pos_list = []
                     uav_x = self.position[0]
                     uav_y = self.position[1]
-                    #received_poi_ugv = msg["received_poi"]
 
                     for s in self.sent_pois:
                         if not s["sent"]:
@@ -41,7 +40,7 @@ class AirProtocol(AirProtocolv1):
                             uav_x = pos[0]
                             uav_y = pos[1]
                             pos_list.append([s["id"], pos])
-                            #received_poi_ugv.append(s["id"])
+                            
                     self.received_ugv += 1
                     reply_msg = {
                         "type": "poi_direction",

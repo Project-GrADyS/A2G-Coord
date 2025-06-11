@@ -14,6 +14,14 @@ from A2G_Coord_v5.air_protocol import AirProtocol as AirProtocolv5
 from A2G_Coord_v5.ground_protocol import GroundProtocol as GroundProtocolv5
 from A2G_Coord_v5.poi_protocol import PoIProtocol as PoIProtocolv5
 
+from A2G_Coord_v6.air_protocol import AirProtocol as AirProtocolv6
+from A2G_Coord_v6.ground_protocol import GroundProtocol as GroundProtocolv6
+from A2G_Coord_v6.poi_protocol import PoIProtocol as PoIProtocolv6
+
+from A2G_Coord_v7.air_protocol import AirProtocol as AirProtocolv7
+from A2G_Coord_v7.ground_protocol import GroundProtocol as GroundProtocolv7
+from A2G_Coord_v7.poi_protocol import PoIProtocol as PoIProtocolv7
+
 
 import importlib
 import json
@@ -45,6 +53,14 @@ def set_algorithms(version):
         AirProtocol = AirProtocolv5
         GroundProtocol = GroundProtocolv5
         PoIProtocol = PoIProtocolv5
+    elif version == "v6":
+        AirProtocol = AirProtocolv6
+        GroundProtocol = GroundProtocolv6
+        PoIProtocol = PoIProtocolv6
+    elif version == "v7":
+        AirProtocol = AirProtocolv7
+        GroundProtocol = GroundProtocolv7
+        PoIProtocol = PoIProtocolv7
     else:
         raise ValueError(f"Unknown version: {version}")
 

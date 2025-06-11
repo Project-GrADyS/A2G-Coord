@@ -1,3 +1,3 @@
 """
-This is the baseline of the algorithm. 
+This is the base algorithm (BA). 
 """
