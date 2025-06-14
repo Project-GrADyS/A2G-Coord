@@ -3,21 +3,21 @@ import csv
 import time
 import json
 from multiprocessing import Pool, cpu_count
-from simulation_config.folder_config import create_folder
+from simulation_config.folder_config import create_folder, create_zip_from_folder
 
 start_time = time.time()
 
 num_experiments = 5
 
 args = {
-    "ugv_num": ["2", "4", "8"],
-    "uav_num": ["2", "3"],
-    "poi_num": ["5", "15", "25"],
-    "communication_range": ["5", "10", "20"],
+    "ugv_num": ["2"],
+    "uav_num": ["2"],
+    "poi_num": ["5"],
+    "communication_range": ["5"],
     "generate_graph": 0,
-    "csv_path": "experiment_timeIntervalUAV",
+    "csv_path": "experiment_zip",
     "map_size": "100",
-    "time_interval": ["20", "100", "500"],
+    "time_interval": ["20"],
     "algorithms": ["v7"]
 }
 
@@ -87,6 +87,8 @@ subprocess.run(["pypy", "join_csvs.py", args["csv_path"], json.dumps(args["algor
 # Gerar gráficos
 subprocess.run(["pypy", "run_graphs.py", args["csv_path"], json.dumps(args["algorithms"])])
 subprocess.run(["pypy", "run_boxplot.py", args["csv_path"], json.dumps(args["algorithms"])])
+
+create_zip_from_folder(folder_path, args["csv_path"])
 
 # Medir tempo
 end_time = time.time()
