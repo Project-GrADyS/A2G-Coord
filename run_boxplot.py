@@ -33,7 +33,7 @@ path = f'{my_path}/{folder_path}/{csv_prefix}/metrics/boxplot_average_time'
 
 #all_df = pd.concat({'BA': alg_df[0], 'GA': alg_df[1], 'LBA': alg_df[2]}, names=['algorithm', 'old_index'])
 #all_df = pd.concat({'v7': alg_df[0]}, names=['algorithm', 'old_index'])
-all_df = pd.concat({'LBA': alg_df[0], 'LBA+': alg_df[1]}, names=['algorithm', 'old_index'])
+all_df = pd.concat({'GBA': alg_df[0], 'BSA': alg_df[1]}, names=['algorithm', 'old_index'])
 all_df = all_df.reset_index(level=0).reset_index(drop=True)
 
 # UGV Number
@@ -69,12 +69,5 @@ sns.boxplot(data=all_df, x='time_interval', y='time_poi', hue='algorithm', palet
 plt.xlabel("Time Interval")
 plt.ylabel("Time to find all POI")
 plt.savefig(f"{path}/{csv_prefix}_boxplot_timeInterval_time.png")
-plt.clf()
-
-# Encounter Location
-sns.boxplot(data=all_df, x='encounter_location', y='time_poi', hue='algorithm', palette='crest', showfliers = False)
-plt.xlabel("Encounter Location")
-plt.ylabel("Time to find all POI")
-plt.savefig(f"{path}/{csv_prefix}_boxplot_encounterLocation_time.png")
 plt.clf()
 

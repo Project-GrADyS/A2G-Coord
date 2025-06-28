@@ -13,7 +13,8 @@ import csv
 import os
 import time
 import json
-from A2G_Coord_v4.base_station_protocol import BaseStationProtocol
+from A2G_Coord_v4.base_station_protocol import BaseStationProtocol as BaseStationProtocolv4
+from A2G_Coord_v6.base_station_protocol import BaseStationProtocol as BaseStationProtocolv6
 
 my_path = os.path.dirname(os.path.abspath(__file__))
 
@@ -24,11 +25,8 @@ uav_num = int(sys.argv[3])
 map_size = int(sys.argv[9])
 communication_range = int(sys.argv[5])
 time_interval = int(sys.argv[11])
-encounter_location = sys.argv[12]
 
 # Algorithm version
-#algorithm_strings = json.loads(sys.argv[10])
-#algorithms = reconstruct_classes(algorithm_strings)
 algorithm_versions = list(json.loads(sys.argv[10]))
 
 # Config variables
@@ -89,11 +87,11 @@ def main(algorithm_version):
     mission = GridPathPlanning(size=map_size, uav_num=uav_num).define_mission()
     for i in range(uav_num):
         uav_ids.append(
-            builder.add_node(air_protocol, (-1 * half_map_size, -1 * half_map_size, 2), mission=mission[i], length=map_size, time_interval=time_interval, encounter_location=encounter_location)
+            builder.add_node(air_protocol, (-1 * half_map_size, -1 * half_map_size, 2), mission=mission[i], length=map_size, time_interval=time_interval)
         )
     
-    if algorithm_version == "v4":
-        builder.add_node(BaseStationProtocol, (-50, -50, 0))
+    if algorithm_version == "v6":
+        builder.add_node(BaseStationProtocolv6, (-50, -50, 0))
     
 
     builder.add_handler(TimerHandler())
@@ -190,7 +188,7 @@ def main(algorithm_version):
     
     # CSV
     with open(f'experiments/{csv_path}/algorithm_{algorithm_version}/data/{csv_name}.csv', mode='a', newline="") as fd:
-        data = [[experiment_num, ugv_num, uav_num, poi_num, communication_range, time_interval, encounter_location,total_time] + poi_times]
+        data = [[experiment_num, ugv_num, uav_num, poi_num, communication_range, time_interval,total_time] + poi_times]
         writer = csv.writer(fd)
         writer.writerows(data)
     

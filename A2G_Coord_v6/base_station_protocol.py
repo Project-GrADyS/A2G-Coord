@@ -31,6 +31,7 @@ class BaseStationProtocol(IProtocol):
             msg = {
                 "type": "base_station_message",
                 "id": self.id,
+                "base_station_buffer": self.base_station_buffer
             }
             command = BroadcastMessageCommand(
                 message=json.dumps(msg)
@@ -45,17 +46,32 @@ class BaseStationProtocol(IProtocol):
 
     def handle_packet(self, message: str):
         msg = json.loads(message)
-        if msg == '':
-            return
-        if msg["type"] == "base_station_response":
-            self.msg_timer = 10
-            self.provider.schedule_timer(
-                "interval",
-                self.provider.current_time() + 5
-            )
+        if msg != '':
+            if msg["type"] == "base_station_response":
+                received_poi = msg["collected_poi"]
+                for p in received_poi:
+                    res = self.check_duplicates(p[0], p[1])
+                    if not res:
+                        self.base_station_buffer.append([p[0], p[1]])
+                self.msg_timer = 5
+                self.provider.schedule_timer(
+                    "interval",
+                    self.provider.current_time() + 5
+                )
+    
+    def check_duplicates(self, id, pos):
+        """
+        Checks if POIs is already in Base Satation Buffer
+        """
+        for s in self.base_station_buffer:
+            if s[0] == id:
+                return True
+        self.base_station_buffer.append([id, pos])
+        return False
 
     def handle_telemetry(self, telemetry: Telemetry):
         pass
 
     def finish(self):
         pass
+    

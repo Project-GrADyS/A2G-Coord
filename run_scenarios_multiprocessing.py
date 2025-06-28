@@ -7,22 +7,21 @@ from simulation_config.folder_config import create_folder, create_zip_from_folde
 
 start_time = time.time()
 
-num_experiments = 10
+num_experiments = 5
 
 args = {
-    "ugv_num": ["2", "4", "8"],
+    "ugv_num": ["2", "4"],
     "uav_num": ["1", "2"],
-    "poi_num": ["5", "15", "25"],
-    "communication_range": ["5", "10", "20"],
-    "generate_graph": 1,
-    "csv_path": "experiment_lbaplus_17",
+    "poi_num": ["5", "15"],
+    "communication_range": ["5", "10"],
+    "generate_graph": 0,
+    "csv_path": "experiment_v5v6",
     "map_size": "100",
     "time_interval": ["20"],
-    "encounter_location": ["center"],
-    "algorithms": ["v3", "v4"]
+    "algorithms": ["v5", "v6"]
 }
 
-header = ['experiment', 'ugv_num', 'uav_num', 'poi_num', 'comm_range', 'time_interval', 'encounter_location','time_poi']
+header = ['experiment', 'ugv_num', 'uav_num', 'poi_num', 'comm_range', 'time_interval', 'time_poi']
 
 # Create experiment folder structure
 folder_path = f'experiments/{args["csv_path"]}'
@@ -40,7 +39,7 @@ for algorithm_version in args["algorithms"]:
 
 # Execute experiments
 def run_simulation(params):
-    i, ugv_num, uav_num, poi_num, comm_range, file_name, csv_path, map_size, generate_graph, algorithms, time_interval, encounter_location = params
+    i, ugv_num, uav_num, poi_num, comm_range, file_name, csv_path, map_size, generate_graph, algorithms, time_interval = params
     subprocess.run([
         "pypy", "main.py",
         str(i + 1),
@@ -53,32 +52,30 @@ def run_simulation(params):
         csv_path,
         map_size,
         json.dumps(algorithms),
-        time_interval,
-        encounter_location
+        time_interval
     ])
 
 # Generate CSVs
 task_list = []
-for encounter_location in args["encounter_location"]:
-    for time_interval in args["time_interval"]:
-        for comm_range in args["communication_range"]:
-            for uav_num in args["uav_num"]:
-                for ugv_num in args["ugv_num"]:
-                    for poi_num in args["poi_num"]:
-                        header_list = ['poi' + str(p+1) for p in range(int(poi_num))]
-                        for algorithm_version in args["algorithms"]:
-                            algorithm_path_data = f'{folder_path}/algorithm_{algorithm_version}/data'
-                            file_name = f'{args["csv_path"]}_ugv{ugv_num}_uav{uav_num}_poi{poi_num}_range{comm_range}_timeInterval{time_interval}_encounterLocation{encounter_location}'
-                            with open(f"{algorithm_path_data}/{file_name}.csv", 'w') as file:
-                                dw = csv.DictWriter(file, fieldnames=header + header_list)
-                                dw.writeheader()
-                        for i in range(num_experiments):
-                            file_name = f'{args["csv_path"]}_ugv{ugv_num}_uav{uav_num}_poi{poi_num}_range{comm_range}_timeInterval{time_interval}_encounterLocation{encounter_location}'
-                            task_list.append((
-                                i, ugv_num, uav_num, poi_num, comm_range,
-                                file_name, args["csv_path"], args["map_size"],
-                                args["generate_graph"], args["algorithms"], time_interval, encounter_location
-                            ))
+for time_interval in args["time_interval"]:
+    for comm_range in args["communication_range"]:
+        for uav_num in args["uav_num"]:
+            for ugv_num in args["ugv_num"]:
+                for poi_num in args["poi_num"]:
+                    header_list = ['poi' + str(p+1) for p in range(int(poi_num))]
+                    for algorithm_version in args["algorithms"]:
+                        algorithm_path_data = f'{folder_path}/algorithm_{algorithm_version}/data'
+                        file_name = f'{args["csv_path"]}_ugv{ugv_num}_uav{uav_num}_poi{poi_num}_range{comm_range}_timeInterval{time_interval}'
+                        with open(f"{algorithm_path_data}/{file_name}.csv", 'w') as file:
+                            dw = csv.DictWriter(file, fieldnames=header + header_list)
+                            dw.writeheader()
+                    for i in range(num_experiments):
+                        file_name = f'{args["csv_path"]}_ugv{ugv_num}_uav{uav_num}_poi{poi_num}_range{comm_range}_timeInterval{time_interval}'
+                        task_list.append((
+                            i, ugv_num, uav_num, poi_num, comm_range,
+                            file_name, args["csv_path"], args["map_size"],
+                            args["generate_graph"], args["algorithms"], time_interval
+                        ))
 
 # Execute simulations in parallel
 with Pool(cpu_count()) as pool:
