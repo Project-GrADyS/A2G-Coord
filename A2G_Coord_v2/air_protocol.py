@@ -35,6 +35,7 @@ class AirProtocol(AirProtocolv1):
                         uav_y = pos[1]
                         pos_list.append([s[0], pos])
                             #received_poi_ugv.append(s[0])
+                    pos_list.append([-1, (0,0,7)])
                     self.received_ugv += 1
                     reply_msg = {
                         "type": "poi_direction",
